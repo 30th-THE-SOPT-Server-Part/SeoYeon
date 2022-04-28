@@ -98,13 +98,22 @@ let asyncFunc2 = (msg:string):Promise<string>=>{
 }
 
 // 함수명 - 인자 string Promise<string> 반환
-let promiseMain1=():void =>{
-    asyncFunc1('server part').then((result:string)=>{
-        console.log(result);
-        return asyncFunc2('채정아');
-    }).then((result:string)=>{
-        console.log(result);
-    });
+// let promiseMain1=():void =>{
+//     asyncFunc1('server part').then((result:string)=>{
+//         console.log(result);
+//         return asyncFunc2('채정아');
+//     }).then((result:string)=>{
+//         console.log(result);
+//     });
+// }
+
+// promiseMain1();
+
+const asyncMain = async()=>{
+    let result = await asyncFunc1('server part');
+    console.log(result);
+    result=await asyncFunc2('채정아');
+    console.log(result);
 }
 
-promiseMain1();
+asyncMain();
