@@ -19,7 +19,6 @@ const MovieSchema = new mongoose.Schema({
     story: {
         type: String
     }
-    
 });
 
 export default mongoose.model<MovieInfo & mongoose.Document>("Movie",MovieSchema);
