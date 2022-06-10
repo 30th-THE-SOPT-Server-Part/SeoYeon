@@ -5,6 +5,11 @@ import message from "../modules/responseMessage";
 import util from "../modules/util";
 import { UserService } from "../services";
 import { UserUpdateDto } from "../interfaces/user/UserUpdateDto";
+import { validationResult } from "express-validator";
+import getToken from "../modules/jwtHandler";
+import { stringify } from "querystring";
+import { UserSignInDto } from "../interfaces/user/UserSignInDto";
+import { PostBaseResponseDto } from "../interfaces/common/PostBaseResponseDto";
 
 /**
  * @route POST /user
@@ -12,13 +17,62 @@ import { UserUpdateDto } from "../interfaces/user/UserUpdateDto";
  * @access Public
  */
 const createUser = async (req: Request, res: Response) => {
+    const error = validationResult(req);
+    if(!error.isEmpty()){
+        return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, message.BAD_REQUEST));
+    }
     const userCreateDto: UserCreateDto = req.body; //User Create Dto로 req.body 받아옴
 
     try {
-        const data = await UserService.createUser(userCreateDto);
+        const result = await UserService.createUser(userCreateDto);
+        if(!result) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, message.PASSWORD_DUPLICATED));
+
+        const accessToken: string = getToken(result._id);
+
+        const data = {
+            _id: result._id,
+            accessToken
+        }
 
         res.status(statusCode.CREATED).send(util.success(statusCode.CREATED, message.CREATE_USER_SUCCESS, data));
     } catch (error) {
+        console.log(error);
+        //서버 내부에서 오류 발생
+        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, message.INTERNAL_SERVER_ERROR));
+    }
+}
+
+/**
+ * @route POST /user/signin
+ * @dest Signin User
+ * @access Public
+ */
+const signInUser = async (req: Request, res: Response) => {
+    const error = validationResult(req);
+    if(!error.isEmpty()){
+        return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, message.BAD_REQUEST));
+    }
+
+    const unserSignInDto: UserSignInDto = req.body;
+
+    try{
+        const result = await UserService.signInUser(unserSignInDto);
+        if(!result) {
+            return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, message.NOT_FOUND));
+        }
+        if(result==401){
+            return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, message.INVALID_PASSWORD));
+        }
+
+        const accessToken = getToken((result as PostBaseResponseDto)._id);
+
+        const data = {
+            _id: (result as PostBaseResponseDto)._id,
+            accessToken
+        };
+
+        res.status(statusCode.OK).send(util.success(statusCode.OK, message.SIGNIN_USER_SUCCESS, data));
+    } catch(error) {
         console.log(error);
         //서버 내부에서 오류 발생
         res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, message.INTERNAL_SERVER_ERROR));
@@ -87,6 +141,7 @@ const deleteUser = async (req: Request, res: Response) => {
 
 export default {
     createUser,
+    signInUser,
     updateUser,
     findUserById,
     deleteUser

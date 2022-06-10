@@ -18,7 +18,20 @@ const MovieSchema = new mongoose.Schema({
     },
     story: {
         type: String
-    }
+    },
+    comments: [{
+        writer: {
+            type: mongoose.Types.ObjectId,
+            required: true,
+            ref: "User"
+        },
+        comment: {
+            type: String,
+            required: true
+        }
+    }, { timestamps: true}]
+}, {
+    timestamps:true //createdAt, updatedAt 자동기록
 });
 
 export default mongoose.model<MovieInfo & mongoose.Document>("Movie",MovieSchema);
