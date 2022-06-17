@@ -1,3 +1,5 @@
+import { FILE } from "dns";
+
 const message = {
     NULL_VALUE: '필요한 값이 없습니다.',
     NOT_FOUND: '존재하지 않는 자원',
@@ -25,7 +27,10 @@ const message = {
     CREATE_MOVIE_SUCCESS: '영화 생성 성공',
     CREATE_MOVIE_COMMENT_SUCCESS: '영화 코멘트 생성 성공',
     READ_MOVIE_SUCCESS: '영화 조회 성공',
-    UPDATE_MOVIE_COMMENT_SUCCESS: "영화 리뷰 수정 성공"
+    UPDATE_MOVIE_COMMENT_SUCCESS: "영화 리뷰 수정 성공",
+
+    //file
+    CREATE_FILE_SUCCESS: '파일 업로드 성공'
 }
 
 export default message;
